@@ -1,0 +1,32 @@
+[2026-02-18 18:41:59] API STATUS 404. Body: {
+  "error": {
+    "code": 404,
+    "message": "This model models/gemini-2.5-flash-preview-09-2025 is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[2026-02-18 19:21:37] API STATUS 404. Body: {
+  "error": {
+    "code": 404,
+    "message": "This model models/gemini-2.5-flash-preview-09-2025 is no longer available. Please update your code to use a newer model for the latest features and improvements.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[2026-02-18 20:36:31] API STATUS 404. Body: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+[2026-02-18 20:41:16] API STATUS 404. Body: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+

@@ -1,0 +1,88 @@
+import httpx
+import json
+import logging
+import asyncio
+import time
+import os
+import socket
+import config
+
+# Настройки прокси
+PROXY_URL = "socks5://127.0.0.1:10808"
+PROXY_HOST = "127.0.0.1"
+PROXY_PORT = 10808
+
+class GeminiClient:
+    def __init__(self, api_key=None):
+        self.api_key = api_key if api_key else config.API_KEY_GEMINI
+        # Используем максимально стабильное имя модели
+        self.model_name = "gemini-1.5-flash" 
+        # Переходим на стабильную версию API v1
+        self.base_url = "https://generativelanguage.googleapis.com/v1/models"
+        self.log_file = os.path.join(config.TEMP_DIR, "gemini_error_log.txt")
+
+    def _write_debug_log(self, message):
+        os.makedirs(config.TEMP_DIR, exist_ok=True)
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{timestamp}] {message}\n")
+
+    def _is_proxy_alive(self):
+        """Проверка, поднят ли SOCKS5 туннель."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)
+            try:
+                s.connect((PROXY_HOST, PROXY_PORT))
+                return True
+            except:
+                return False
+
+    async def ask(self, prompt: str):
+        if not self.api_key or "YOUR_API_KEY" in self.api_key:
+            self._write_debug_log("ERROR: API Key is missing.")
+            return None
+
+        if not self._is_proxy_alive():
+            self._write_debug_log("PROXY ERROR: Port 10808 is closed. AI request aborted.")
+            return "ОШИБКА: Прокси-сервер (порт 10808) не отвечает. Проверьте соединение."
+        
+        # Список вариаций моделей на случай, если Google опять что-то сменит
+        # Но приоритет отдаем стабильной 1.5-flash
+        models_to_try = [self.model_name, "gemini-1.5-flash-latest", "gemini-pro"]
+        
+        for model in models_to_try:
+            # Эндпоинт v1 более надежен для стабильных моделей
+            url = f"{self.base_url}/{model}:generateContent?key={self.api_key}"
+            
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2,
+                    "topP": 0.8,
+                    "topK": 40,
+                    "maxOutputTokens": 8192,
+                }
+            }
+
+            try:
+                async with httpx.AsyncClient(proxy=PROXY_URL, timeout=120.0) as client:
+                    response = await client.post(url, json=payload)
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        # Безопасное извлечение текста
+                        try:
+                            text = result['candidates'][0]['content']['parts'][0]['text']
+                            return text
+                        except (KeyError, IndexError):
+                            self._write_debug_log(f"JSON Structure Error: {json.dumps(result)}")
+                            continue
+                    
+                    # Логируем ошибку и пробуем следующую модель
+                    self._write_debug_log(f"API Error ({model}): {response.status_code} - {response.text}")
+                    
+            except Exception as e:
+                self._write_debug_log(f"Request Exception ({model}): {str(e)}")
+                continue
+        
+        return None
