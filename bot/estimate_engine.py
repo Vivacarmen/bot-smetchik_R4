@@ -4,8 +4,18 @@ import logging
 import re
 import os
 
-# Импорты из пакета bot
-from bot.style_config import StyleConfig
+# Импорты из пакета bot# Старый импорт
+# from bot.style_config import StyleConfig
+
+# Новый импорт
+from bot.filename_generator import generate_estimate_filename
+
+# Старый вызов
+# filename = StyleConfig.generate_filename(p_info, is_internal)
+
+# Новый вызов
+filename = generate_estimate
+
 from bot.header_builder import HeaderBuilder
 
 
