@@ -17,3 +17,5 @@ jobs:
           script: |
             cd /root/projects/py
             git pull origin main
+            # Перезапуск бота через pm2
+            pm2 restart bot-smetchik_R4 || pm2 start main.py --name bot-smetchik_R4
