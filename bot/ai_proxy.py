@@ -68,6 +68,10 @@ class AIClient:
         """
         Отправка запроса к AI с fallback на резервные модели.
         """
+
+        if self.provider == "gemini":
+    return await self._ask_gemini(prompt, system_prompt)
+
         if not self.api_key:
             self._write_debug_log("ERROR: API Key is missing in config")
             return None
@@ -156,3 +160,12 @@ class AIClient:
                 return response.status_code == 200
         except:
             return False
+
+    async def _ask_gemini(self, prompt, system_prompt):
+    import google.generativeai as genai
+    genai.configure(api_key=config.GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    
+    full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+    response = model.generate_content(full_prompt)
+    return response.text
