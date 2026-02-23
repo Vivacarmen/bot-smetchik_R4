@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: Deploy to Server
+name: Deploy Files
 on:
   push:
     branches: [main]
@@ -17,4 +17,4 @@ jobs:
           script: |
             cd /root/projects/py
             git pull origin main
-            sudo systemctl restart teambot
+            echo "Files updated, bot is still running"
