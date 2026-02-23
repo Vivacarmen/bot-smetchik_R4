@@ -1,0 +1,17 @@
+name: Restart Bot
+on:
+  workflow_dispatch:  # Только ручной запуск по кнопке
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restart bot on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo systemctl restart teambot
+            echo "Bot restarted successfully"
